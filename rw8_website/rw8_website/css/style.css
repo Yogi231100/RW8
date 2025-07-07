@@ -1,0 +1,32 @@
+/* Tema Warna */
+.bg-merah {
+    background-color: #b23a48;
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background-color: #f8f9fa;
+}
+
+h1, h5 {
+    font-weight: bold;
+}
+
+.card {
+    border: 2px solid #865439;
+}
+
+.btn-primary {
+    background-color: #0077b6;
+    border-color: #0077b6;
+}
+
+.btn-primary:hover {
+    background-color: #023e8a;
+    border-color: #023e8a;
+}
