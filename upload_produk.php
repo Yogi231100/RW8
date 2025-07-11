@@ -1,8 +1,11 @@
 <?php
+session_start();
+$isAdmin = isset($_SESSION['admin']) && $_SESSION['admin'] === true;
+
 $file = 'produk.json';
 $data = file_exists($file) ? json_decode(file_get_contents($file), true) : [];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAdmin) {
     $judul = htmlspecialchars($_POST['judul']);
     $deskripsi = htmlspecialchars($_POST['deskripsi']);
     $harga = htmlspecialchars($_POST['harga']);
@@ -17,19 +20,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fileName = uniqid() . '_' . basename($_FILES['file']['name']);
     $targetPath = $uploadDir . $fileName;
 
-    if (move_uploaded_file($uploadedFile, $targetPath)) {
-        $data[] = [
-            'id' => uniqid(),
-            'judul' => $judul,
-            'deskripsi' => $deskripsi,
-            'harga' => $harga,
-            'nomor_hp' => $nomor_hp,
-            'file' => $targetPath
-        ];
-        file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
-        $success = true;
+    $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+    $fileType = strtolower(pathinfo($targetPath, PATHINFO_EXTENSION));
+
+    if (in_array($fileType, $allowed) && $_FILES['file']['size'] <= 2 * 1024 * 1024) {
+        if (move_uploaded_file($uploadedFile, $targetPath)) {
+            $data[] = [
+                'id' => uniqid(),
+                'judul' => $judul,
+                'deskripsi' => $deskripsi,
+                'harga' => $harga,
+                'nomor_hp' => $nomor_hp,
+                'file' => $targetPath
+            ];
+            file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
+            $success = true;
+        } else {
+            $error = "Gagal mengupload gambar.";
+        }
     } else {
-        $error = "Gagal mengupload gambar.";
+        $error = "Format file tidak didukung atau ukuran melebihi 2MB.";
     }
 }
 ?>
@@ -47,7 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       --warna-hijau: #2E7D32;
       --warna-hijau-muda: #66BB6A;
       --warna-hover: #FBC02D;
-      --warna-abu: #f1f3f5;
       --warna-teks: #333333;
     }
 
@@ -105,45 +114,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 <div class="container">
-  <h3>Form Upload Produk UMKM RW 8</h3>
+  <h3>Upload Produk UMKM RW 8</h3>
 
-  <?php if (isset($success)): ?>
-    <div class="alert alert-success">✅ Produk berhasil diupload.</div>
-  <?php elseif (isset($error)): ?>
-    <div class="alert alert-danger"><?= $error ?></div>
+  <?php if ($isAdmin): ?>
+    <?php if (isset($success)): ?>
+      <div class="alert alert-success">✅ Produk berhasil diupload.</div>
+    <?php elseif (isset($error)): ?>
+      <div class="alert alert-danger"><?= $error ?></div>
+    <?php endif; ?>
+
+    <form method="POST" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label class="form-label">Nama Produk</label>
+        <input type="text" name="judul" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Deskripsi Produk</label>
+        <textarea name="deskripsi" class="form-control" rows="3" required></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Harga Produk</label>
+        <input type="number" name="harga" class="form-control" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Nomor WhatsApp Penjual</label>
+        <input type="text" name="nomor_hp" class="form-control" placeholder="6281234567890" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Gambar Produk</label>
+        <input type="file" name="file" accept="image/*" class="form-control" required>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <button type="submit" class="btn btn-success"><i class="fas fa-upload"></i> Upload Produk</button>
+        <a href="kontak.php" class="btn btn-secondary"><i class="fas fa-store"></i> Lihat Produk</a>
+      </div>
+    </form>
+  <?php else: ?>
+    <div class="alert alert-info text-center">
+      Anda hanya dapat melihat produk, hanya admin yang dapat mengupload.
+    </div>
+    <div class="text-center mt-4">
+      <a href="kontak.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali ke Produk</a>
+    </div>
   <?php endif; ?>
-
-  <form method="POST" enctype="multipart/form-data">
-    <div class="mb-3">
-      <label class="form-label">Nama Produk</label>
-      <input type="text" name="judul" class="form-control" required>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Deskripsi Produk</label>
-      <textarea name="deskripsi" class="form-control" rows="3" required></textarea>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Harga Produk</label>
-      <input type="number" name="harga" class="form-control" required>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Nomor WhatsApp Penjual</label>
-      <input type="text" name="nomor_hp" class="form-control" placeholder="Contoh: 6281234567890" required>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Gambar Produk</label>
-      <input type="file" name="file" accept="image/*" class="form-control" required>
-    </div>
-
-    <div class="d-flex justify-content-between">
-      <button type="submit" class="btn btn-success">Upload Produk</button>
-      <a href="kontak.php" class="btn btn-secondary">Lihat Produk</a>
-    </div>
-  </form>
 </div>
 </body>
 </html>
