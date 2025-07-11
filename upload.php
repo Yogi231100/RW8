@@ -1,4 +1,11 @@
 <?php
+session_start();
+
+if (!isset($_SESSION['admin'])) {
+  header("Location: login.php");
+  exit;
+}
+
 $dataFile = 'data.json';
 $uploadSuccess = false;
 
@@ -117,17 +124,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     .text-center .btn {
       margin-top: 20px;
     }
+
+    .logout-link {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+    }
+
+    .logout-link a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .logout-link a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
+
+  <div class="logout-link">
+    <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </div>
 
   <div class="container my-5">
     <h2><i class="fas fa-upload"></i> Upload Dokumentasi Kegiatan RW 8</h2>
 
     <?php if ($_SERVER["REQUEST_METHOD"] == "POST" && !$uploadSuccess): ?>
-  <div class="alert alert-danger">Gagal mengunggah gambar. Pastikan file valid dan ukuran tidak lebih dari 2MB.</div>
-<?php endif; ?>
-
+      <div class="alert alert-danger">Gagal mengunggah gambar. Pastikan file valid dan ukuran tidak lebih dari 2MB.</div>
+    <?php endif; ?>
 
     <form method="POST" enctype="multipart/form-data">
       <div class="mb-3">
