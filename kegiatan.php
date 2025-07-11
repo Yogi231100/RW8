@@ -1,3 +1,9 @@
+<?php
+session_start(); // Cek sesi admin
+
+$file = 'data.json';
+$dataUpload = file_exists($file) ? json_decode(file_get_contents($file), true) : [];
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -30,16 +36,27 @@
     header {
       background: linear-gradient(to right, var(--hijau), var(--kuning));
       color: var(--putih);
-      padding: 30px 20px 60px;
-      text-align: center;
+      padding: 30px 20px 40px;
       position: relative;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
 
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .nav-left, .nav-right {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
     .btn-custom {
-      position: absolute;
-      top: 15px;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       padding: 6px 16px;
       border-radius: 25px;
       background: linear-gradient(to right, var(--hijau-cerah), var(--kuning-lembut));
@@ -47,6 +64,7 @@
       font-weight: 600;
       border: none;
       transition: 0.3s ease-in-out;
+      text-decoration: none;
     }
 
     .btn-custom:hover {
@@ -55,9 +73,12 @@
       transform: translateY(-2px);
     }
 
-    .btn-back { left: 15px; }
-    .btn-upload { left: 140px; }
-    .btn-pesan { right: 15px; }
+    header h2 {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 24px;
+      font-weight: 700;
+    }
 
     main {
       flex: 1;
@@ -113,28 +134,43 @@
     }
 
     @media (max-width: 576px) {
-      .btn-upload {
-        top: 55px;
-        left: 15px;
+      .header-nav {
+        flex-direction: column;
+        align-items: flex-start;
       }
 
       header h2 {
+        margin-top: 20px;
         font-size: 1.2rem;
+        text-align: left;
       }
     }
   </style>
 </head>
 <body>
-<?php
-$file = 'data.json';
-$dataUpload = file_exists($file) ? json_decode(file_get_contents($file), true) : [];
-?>
 
-<header>
-  <a href="index.php" class="btn btn-custom btn-back"><i class="fas fa-home"></i> Beranda</a>
-  <a href="upload.php" class="btn btn-custom btn-upload"><i class="fas fa-upload"></i> Upload</a>
-  <a href="kontak.php" class="btn btn-custom btn-pesan"><i class="fas fa-store"></i> Galeri Produk</a>
-  <h2 class="mt-4">DOKUMENTASI KEGIATAN DI RW 8</h2>
+<header class="container-fluid">
+  <div class="header-nav px-3 d-flex justify-content-between align-items-center flex-wrap">
+    <div class="nav-left d-flex gap-2 flex-wrap">
+      <a href="index.php" class="btn btn-custom"><i class="fas fa-home"></i> Beranda</a>
+      <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] === true): ?>
+        <a href="upload.php" class="btn btn-custom"><i class="fas fa-upload"></i> Upload Dokumentasi</a>
+      <?php endif; ?>
+    </div>
+    <div class="nav-right mt-2 mt-sm-0">
+      <a href="kontak.php" class="btn btn-custom"><i class="fas fa-store"></i> Galeri Produk</a>
+      <?php if (isset($_SESSION['admin']) && $_SESSION['admin'] === true): ?>
+        <a href="logout.php" class="btn btn-custom"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      <?php else: ?>
+        <a href="login.php" class="btn btn-custom"><i class="fas fa-sign-in-alt"></i> Login Admin</a>
+      <?php endif; ?>
+    </div>
+  </div>
+
+  <!-- Judul di tengah halaman -->
+  <div class="d-flex justify-content-center">
+    <h2 class="mt-4">DOKUMENTASI KEGIATAN DI RW 8</h2>
+  </div>
 </header>
 
 <main class="container">
